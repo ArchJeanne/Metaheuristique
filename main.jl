@@ -60,6 +60,45 @@ function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
     end
 end
 
+function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
+    best_color = copy(G.color)
+    best_value = evaluate(G)
+    iter = 0
+    tabu_list = zeros(Int, G.nbr_vertices, nbr_colors)
+
+    current_vertice = rand(1:G.nbr_vertices)
+    local_best_color = rand(1:nbr_colors)
+    local_best_value = 100000
+    while iter <= nbr_max_iter
+        local_best_value = 100000
+        local_best_color = G.color[current_vertice]
+        tabu_list[current_vertice, G.color[current_vertice]] = iter
+        for c=1:nbr_colors
+            if iter > tabu_list[current_vertice, c]
+                G.color[current_vertice] = c
+                neighboor_value = evaluate(G)
+                if neighboor_value < local_best_value
+                    local_best_color = c
+                    local_best_value = neighboor_value
+                end
+            end
+        end
+        G.color[current_vertice] = local_best_color
+        tabu_list[current_vertice, local_best_color] += tabu_memory_iter
+        if local_best_value < best_value
+            for v in 1:G.nbr_vertices
+                best_color[v] = G.color[v]
+            end
+            best_value = evaluate(G)
+        end
+        iter += 1
+        current_vertice = rand(1:G.nbr_vertices)
+    end
+    for v in 1:G.nbr_vertices
+        G.color[v] = best_color[v]
+    end
+end
+
 #--------------------------------------------------------------------------------------
 
 fichier_texte = "Fichiers/dsjc125.1.col.txt"
@@ -83,3 +122,6 @@ println(evaluate(G))
 greedy_random_assignment(G, 5)
 println(evaluate(G))
 
+println("Executing Tabu Search ...") 
+tabu_search(G, 5, 50000, 500)
+println(evaluate(G))

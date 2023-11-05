@@ -74,12 +74,12 @@ function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
     Assigns to each vertix a random color that is not its neighboors' if possible, and a random color otherwise
     """
     for i=1:G.nbr_vertices
-        adj_colors = [G.color[v] for v=1:(i-1) if G.adj[v,i]==1]
-        no_conflicts_color = [k for k=1:nbr_colors if !(k in(adj_colors))]
+        adj_colors = [G.color[v] for v=1:(i-1) if G.adj[v,i]==1] #colors of neighboors
+        no_conflicts_color = [k for k=1:nbr_colors if !(k in(adj_colors))] #colors of neighboors that are not in conflict with current color
         if length(no_conflicts_color) > 0
-            G.color[i] = no_conflicts_color[rand(1:length(no_conflicts_color))]
+            G.color[i] = no_conflicts_color[rand(1:length(no_conflicts_color))] #pick one color out of the colors that don't create a conflict
         else
-            G.color[i] = rand(1:nbr_colors)
+            G.color[i] = rand(1:nbr_colors) #otherwise pick a random color
         end
     end
 end
@@ -127,14 +127,14 @@ end
 function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::Bool, permute::Bool)
     """Evaluates for a given file the number of conflicts nbr_iters times
     Returns the min number of conflicts and corresponding execution time"""
-    conflicts = zeros(Int,nbr_iters)
-    execution_times = zeros(Float64,nbr_iters)
+    conflicts = zeros(Int,nbr_iters) #list of conflicts for each iteration
+    execution_times = zeros(Float64,nbr_iters) #list of execution times for each iteration
     G_0 = read_file(file_txt, permute)
     for i=1:nbr_iters
         start_execution_time = time()
         if tabu
             # println("Executing Tabu Search ...") 
-            tabu_search(G_0, nbr_colors, 50000, 500) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
+            tabu_search(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
 
         else
             # println("Executing Greedy Heuristic ...")
@@ -145,7 +145,7 @@ function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::
         end_execution_time = time()
         execution_times[i] = end_execution_time - start_execution_time
     end
-    index_of_min = argmin(conflicts)
+    index_of_min = argmin(conflicts) #Mmin number of conflits
     println(minimum(conflicts), " : min nb of conflicts")
     println(round(mean(conflicts),digits = 4), " : mean nb of conflicts")
     println(maximum(conflicts), " : max nb of conflicts")
@@ -167,11 +167,9 @@ function evaluate_all_files()
 
         time_end = time()
         execution_time = round(time_end - time_start,digits = 4)
-        nb_solutions_evaluated_per_sec = round(nbr_iters/(time_end - time_start), digits=2)
-        # mean_execution_time = round(execution_time/nbr_iters,digits = 4)
         println("Total execution time : $execution_time secondes")
-        # println("Mean execution time : $mean_execution_time secondes")
         if tabu == false
+            nb_solutions_evaluated_per_sec = round(nbr_iters/(time_end - time_start), digits=2)
             println("Number of solutions evaluated per second : $nb_solutions_evaluated_per_sec")
         end
     end
@@ -180,12 +178,16 @@ end
 
 #--------------------------------------------------------------------------------------
 
-# Parameters
+### Parameters
 list_paths = ["Fichiers/dsjc125.1.col.txt","Fichiers/dsjc125.9.col.txt","Fichiers/dsjc250.1.col.txt","Fichiers/dsjc250.5.col.txt","Fichiers/dsjc250.9.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/flat300_26_0.col.txt","Fichiers/le450_15c.col.txt"]
 list_nb_colors = [5, 44, 8, 28, 72, 86, 85, 84, 26, 15]
 nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conflicts nbr_iters time and compute the min nbr of conflicts)
-tabu = false
+tabu = true
 permute = false
+# for tabu search
+nbr_max_iter_tabu = 50000
+iter_tabu_memory = 500
+
 
 # Evaluation
 evaluate_all_files()

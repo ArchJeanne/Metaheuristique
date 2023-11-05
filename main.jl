@@ -26,8 +26,8 @@ function read_file(path::String, permute::Bool)
     for line in eachline(file)  
         if line[1]=='e'
             vertices = split(line)
-            vertice1 = parse(Int, vertices[2])  # First vertice
-            vertice2 = parse(Int, vertices[3])  # Second vertice
+            vertice1 = parse(Int, vertices[2])  # First vertex
+            vertice2 = parse(Int, vertices[3])  # Second vertex
             adj_matrix[vertice1, vertice2] = 1
             adj_matrix[vertice2, vertice1] = 1
         end
@@ -50,7 +50,7 @@ function evaluate_single_instance(G::Graph_color)
 end
 
 function permute_vertices(G::Graph_color) 
-    """Changes randomly the vertixes order considered for the coloring"""
+    """Changes randomly the vertices order considered for the coloring"""
     adj_matrix = G.adj
     colors = G.color
     perm = randperm(size(adj_matrix, 1)) #permutation of the order of vertices
@@ -63,7 +63,7 @@ function permute_vertices(G::Graph_color)
 end
 
 function random_assignment(G::Graph_color, nbr_colors::Int) 
-    """Assigns to each vertixes a random color"""
+    """Assigns to each vertices a random color"""
     for i=1:G.nbr_vertices
         G.color[i] = rand(1:nbr_colors)
     end
@@ -71,7 +71,7 @@ end
 
 function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
     """
-    Assigns to each vertix a random color that is not its neighboors' if possible, and a random color otherwise
+    Assigns to each vertex a random color that is not its neighboors' if possible, and a random color otherwise
     """
     for i=1:G.nbr_vertices
         adj_colors = [G.color[v] for v=1:(i-1) if G.adj[v,i]==1] #colors of neighboors
@@ -84,39 +84,51 @@ function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
     end
 end
 
+function diff_evaluate_one_vertice(G::Graph_color, v::Int, old_color::Int, new_color::Int)
+    diff_conflicts = 0
+    for i=1:G.nbr_vertices
+        if G.adj[i,v] == 1
+            if old_color == G.color[i]
+                diff_conflicts = diff_conflicts - 1
+            end
+            if new_color == G.color[i]
+                diff_conflicts = diff_conflicts + 1
+            end
+        end
+    end
+    return diff_conflicts
+end
+
 function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
     best_color = copy(G.color)
     best_value = evaluate_single_instance(G)
     iter = 0
     tabu_list = zeros(Int, G.nbr_vertices, nbr_colors)
-
-    current_vertice = rand(1:G.nbr_vertices)
-    local_best_color = rand(1:nbr_colors)
-    local_best_value = 100000
+    current_vertex = rand(1:G.nbr_vertices)
     while iter <= nbr_max_iter
         local_best_value = 100000
-        local_best_color = G.color[current_vertice]
-        tabu_list[current_vertice, G.color[current_vertice]] = iter
+        local_best_color = G.color[current_vertex]
+        tabu_list[current_vertex, G.color[current_vertex]] = iter
         for c=1:nbr_colors
-            if iter > tabu_list[current_vertice, c]
-                G.color[current_vertice] = c
-                neighboor_value = evaluate_single_instance(G)
+            if iter > tabu_list[current_vertex, c]
+                current_value = evaluate_single_instance(G)
+                neighboor_value = current_value + diff_evaluate_one_vertice(G, current_vertex, G.color[current_vertex], c)
                 if neighboor_value < local_best_value
                     local_best_color = c
                     local_best_value = neighboor_value
                 end
             end
         end
-        G.color[current_vertice] = local_best_color
-        tabu_list[current_vertice, local_best_color] += tabu_memory_iter
+        G.color[current_vertex] = local_best_color
+        tabu_list[current_vertex, local_best_color] += tabu_memory_iter
         if local_best_value < best_value
             for v in 1:G.nbr_vertices
                 best_color[v] = G.color[v]
             end
-            best_value = evaluate_single_instance(G)
+            best_value = local_best_value
         end
         iter += 1
-        current_vertice = rand(1:G.nbr_vertices)
+        current_vertex = rand(1:G.nbr_vertices)
     end
     for v in 1:G.nbr_vertices
         G.color[v] = best_color[v]
@@ -145,7 +157,7 @@ function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::
         end_execution_time = time()
         execution_times[i] = end_execution_time - start_execution_time
     end
-    index_of_min = argmin(conflicts) #Mmin number of conflits
+    index_of_min = argmin(conflicts) #Mmin number of conflicts
     println(minimum(conflicts), " : min nb of conflicts")
     println(round(mean(conflicts),digits = 4), " : mean nb of conflicts")
     println(maximum(conflicts), " : max nb of conflicts")
@@ -179,38 +191,39 @@ end
 #--------------------------------------------------------------------------------------
 
 ### Parameters
-list_paths = ["Fichiers/dsjc125.1.col.txt","Fichiers/dsjc125.9.col.txt","Fichiers/dsjc250.1.col.txt","Fichiers/dsjc250.5.col.txt","Fichiers/dsjc250.9.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/flat300_26_0.col.txt","Fichiers/le450_15c.col.txt"]
-list_nb_colors = [5, 44, 8, 28, 72, 86, 85, 84, 26, 15]
-nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conflicts nbr_iters time and compute the min nbr of conflicts)
-tabu = true
-permute = false
+const list_paths = ["Fichiers/dsjc125.1.col.txt","Fichiers/dsjc125.9.col.txt","Fichiers/dsjc250.1.col.txt","Fichiers/dsjc250.5.col.txt","Fichiers/dsjc250.9.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/dsjc1000.5.col.txt","Fichiers/flat300_26_0.col.txt","Fichiers/le450_15c.col.txt"]
+const list_nb_colors = [5, 44, 8, 28, 72, 86, 85, 84, 26, 15]
+const nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conflicts nbr_iters time and compute the min nbr of conflicts)
+const tabu = true
+const permute = false
 # for tabu search
-nbr_max_iter_tabu = 50000
-iter_tabu_memory = 500
+const nbr_max_iter_tabu = 50000
+const iter_tabu_memory = 500
 
 
 # Evaluation
-evaluate_all_files()
-
-
-
-
+#evaluate_all_files()
 
 
 
 
 # #Tests
-# println(typeof(G))
-# println(typeof(G.nbr_vertices))
-# println(G.nbr_vertices)
-# println(typeof(G.adj))
-# println(size(G.adj))
-# println(typeof(G.color))
-# println(size(G.color))
-# println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
+G = read_file("Fichiers/dsjc125.1.col.txt", false)
+println(typeof(G))
+println(typeof(G.nbr_vertices))
+println(G.nbr_vertices)
+println(typeof(G.adj))
+println(size(G.adj))
+println(typeof(G.color))
+println(size(G.color))
+println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
 
-# println(evaluate_single_instance(G))
-# random_assignment(G, 5)
-# println(evaluate_single_instance(G))
-# greedy_random_assignment(G, 5)
-# println(evaluate_single_instance(G))
+println(evaluate_single_instance(G))
+random_assignment(G, 5)
+println(evaluate_single_instance(G))
+#greedy_random_assignment(G, 5)
+#println(evaluate_single_instance(G))
+
+println("Executing Tabu Search ...") 
+tabu_search(G, 5, 300000, 5000)
+println(evaluate_single_instance(G))

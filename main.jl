@@ -131,8 +131,8 @@ function global_evaluation(file_txt::String, nbr_iters::Int, nbr_colors::Int, ta
     Returns the min number of conflicts and corresponding execution time"""
     conflicts = zeros(Int,nbr_iters)
     execution_times = zeros(Float64,nbr_iters)
+    G_0 = read_file(file_txt, permute)
     for i=1:nbr_iters
-        G_0 = read_file(file_txt, permute)
         if tabu
             # println("Executing Tabu Search ...") 
             execution_times[i] = tabu_search(G_0, nbr_colors, 50000, 500) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
@@ -148,7 +148,7 @@ function global_evaluation(file_txt::String, nbr_iters::Int, nbr_colors::Int, ta
     println(minimum(conflicts), " : min nb of conflicts")
     println(round(mean(conflicts),digits = 2), " : mean nb of conflicts")
     println(maximum(conflicts), " : max nb of conflicts")
-    println("Best solution execution time : ", round(execution_times[index_of_min], digits = 2))
+    println("Best solution execution time : ", round(execution_times[index_of_min], digits = 2), " secondes")
 end
 
 
@@ -160,7 +160,7 @@ function evaluate_all_files()
         nbr_colors = list_nb_colors[i]
 
         println("------------------------------------")
-        println(path, " - ", nbr_colors, " colors",if tabu " - Tabu search" else " - Greedy heuristic" end, if permute " - Permuted" end)
+        println(path, " - ", nbr_colors, " colors",if tabu " - Tabu search" else " - Greedy heuristic" end, if permute " - Permuted" else "" end)
         global_evaluation(path,nbr_iters,nbr_colors,tabu,permute)
 
         time_end = time()
@@ -179,7 +179,7 @@ list_paths = ["Fichiers/dsjc125.1.col.txt","Fichiers/dsjc125.9.col.txt","Fichier
 list_nb_colors = [5, 44, 8, 72, 86, 85, 84, 26, 15]
 nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conflicts nbr_iters time and compute the min nbr of conflicts)
 tabu = true
-permute = true
+permute = false
 
 # Evaluation
 evaluate_all_files()

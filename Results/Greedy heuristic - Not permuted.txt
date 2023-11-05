@@ -1,80 +1,80 @@
 ------------------------------------
 Fichiers/dsjc125.1.col.txt - 5 colors - Greedy heuristic - Not permuted
 53 : min nb of conflicts
-61.1 : mean nb of conflicts
-76 : max nb of conflicts
-Best solution execution time : 0.0 secondes
-Total execution time : 0.134 secondes
-Mean execution time : 0.0134 secondes
-------------------------------------
-Fichiers/dsjc125.9.col.txt - 44 colors - Greedy heuristic - Not permuted
-49 : min nb of conflicts
-59.2 : mean nb of conflicts
+62.0 : mean nb of conflicts
 70 : max nb of conflicts
 Best solution execution time : 0.0 secondes
-Total execution time : 0.014 secondes
-Mean execution time : 0.0014 secondes
+Total execution time : 0.006 secondes
+Number of solutions evaluated per second : 1666.66
+------------------------------------
+Fichiers/dsjc125.9.col.txt - 44 colors - Greedy heuristic - Not permuted
+52 : min nb of conflicts
+59.4 : mean nb of conflicts
+69 : max nb of conflicts
+Best solution execution time : 0.0 secondes
+Total execution time : 0.016 secondes
+Number of solutions evaluated per second : 625.0
 ------------------------------------
 Fichiers/dsjc250.1.col.txt - 8 colors - Greedy heuristic - Not permuted
-158 : min nb of conflicts
-176.4 : mean nb of conflicts
-207 : max nb of conflicts
+147 : min nb of conflicts
+170.3 : mean nb of conflicts
+199 : max nb of conflicts
 Best solution execution time : 0.0 secondes
-Total execution time : 0.011 secondes
-Mean execution time : 0.0011 secondes
+Total execution time : 0.012 secondes
+Number of solutions evaluated per second : 833.33
 ------------------------------------
 Fichiers/dsjc250.5.col.txt - 28 colors - Greedy heuristic - Not permuted
-255 : min nb of conflicts
-299.2 : mean nb of conflicts
-341 : max nb of conflicts
-Best solution execution time : 0.002 secondes
-Total execution time : 0.032 secondes
-Mean execution time : 0.0032 secondes
+242 : min nb of conflicts
+298.4 : mean nb of conflicts
+320 : max nb of conflicts
+Best solution execution time : 0.0 secondes
+Total execution time : 0.03 secondes
+Number of solutions evaluated per second : 333.33
 ------------------------------------
 Fichiers/dsjc250.9.col.txt - 72 colors - Greedy heuristic - Not permuted
-151 : min nb of conflicts
-172.7 : mean nb of conflicts
-192 : max nb of conflicts
+163 : min nb of conflicts
+176.5 : mean nb of conflicts
+194 : max nb of conflicts
 Best solution execution time : 0.0 secondes
-Total execution time : 0.036 secondes
-Mean execution time : 0.0036 secondes
+Total execution time : 0.041 secondes
+Number of solutions evaluated per second : 243.9
 ------------------------------------
 Fichiers/dsjc1000.5.col.txt - 86 colors - Greedy heuristic - Not permuted
-1493 : min nb of conflicts
-1551.3 : mean nb of conflicts
-1614 : max nb of conflicts
-Best solution execution time : 0.017 secondes
-Total execution time : 0.3 secondes
-Mean execution time : 0.03 secondes
+1513 : min nb of conflicts
+1573.7 : mean nb of conflicts
+1625 : max nb of conflicts
+Best solution execution time : 0.008 secondes
+Total execution time : 0.321 secondes
+Number of solutions evaluated per second : 31.15
 ------------------------------------
 Fichiers/dsjc1000.5.col.txt - 85 colors - Greedy heuristic - Not permuted
-1596 : min nb of conflicts
-1650.3 : mean nb of conflicts
-1710 : max nb of conflicts
-Best solution execution time : 0.008 secondes
-Total execution time : 0.283 secondes
-Mean execution time : 0.0283 secondes
+1502 : min nb of conflicts
+1627.1 : mean nb of conflicts
+1708 : max nb of conflicts
+Best solution execution time : 0.018 secondes
+Total execution time : 0.348 secondes
+Number of solutions evaluated per second : 28.74
 ------------------------------------
 Fichiers/dsjc1000.5.col.txt - 84 colors - Greedy heuristic - Not permuted
-1573 : min nb of conflicts
-1700.2 : mean nb of conflicts
-1790 : max nb of conflicts
+1588 : min nb of conflicts
+1676.2 : mean nb of conflicts
+1751 : max nb of conflicts
 Best solution execution time : 0.008 secondes
-Total execution time : 0.42 secondes
-Mean execution time : 0.042 secondes
+Total execution time : 0.433 secondes
+Number of solutions evaluated per second : 23.09
 ------------------------------------
 Fichiers/flat300_26_0.col.txt - 26 colors - Greedy heuristic - Not permuted
-546 : min nb of conflicts
-584.0 : mean nb of conflicts
-634 : max nb of conflicts
-Best solution execution time : 0.009 secondes
-Total execution time : 0.031 secondes
-Mean execution time : 0.0031 secondes
+542 : min nb of conflicts
+581.7 : mean nb of conflicts
+627 : max nb of conflicts
+Best solution execution time : 0.0 secondes
+Total execution time : 0.041 secondes
+Number of solutions evaluated per second : 243.9
 ------------------------------------
 Fichiers/le450_15c.col.txt - 15 colors - Greedy heuristic - Not permuted
-716 : min nb of conflicts
-766.5 : mean nb of conflicts
-824 : max nb of conflicts
+746 : min nb of conflicts
+777.1 : mean nb of conflicts
+821 : max nb of conflicts
 Best solution execution time : 0.0 secondes
 Total execution time : 0.032 secondes
-Mean execution time : 0.0032 secondes
+Number of solutions evaluated per second : 312.5

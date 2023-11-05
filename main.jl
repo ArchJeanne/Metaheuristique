@@ -167,9 +167,13 @@ function evaluate_all_files()
 
         time_end = time()
         execution_time = round(time_end - time_start,digits = 4)
-        mean_execution_time = round(execution_time/nbr_iters,digits = 4)
+        nb_solutions_evaluated_per_sec = round(nbr_iters/(time_end - time_start), digits=2)
+        # mean_execution_time = round(execution_time/nbr_iters,digits = 4)
         println("Total execution time : $execution_time secondes")
-        println("Mean execution time : $mean_execution_time secondes")
+        # println("Mean execution time : $mean_execution_time secondes")
+        if tabu == false
+            println("Number of solutions evaluated per second : $nb_solutions_evaluated_per_sec")
+        end
     end
 end
 
@@ -181,7 +185,7 @@ list_paths = ["Fichiers/dsjc125.1.col.txt","Fichiers/dsjc125.9.col.txt","Fichier
 list_nb_colors = [5, 44, 8, 28, 72, 86, 85, 84, 26, 15]
 nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conflicts nbr_iters time and compute the min nbr of conflicts)
 tabu = false
-permute = true
+permute = false
 
 # Evaluation
 evaluate_all_files()

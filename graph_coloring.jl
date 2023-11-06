@@ -112,7 +112,7 @@ function neighbors(G::Graph_color, vertex::Int)
 end
 
 
-function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
+function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
     best_color = copy(G.color)
     best_value = evaluate_single_instance(G)
     iter = 0
@@ -212,9 +212,12 @@ function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::
     for i=1:nbr_iters
         start_execution_time = time()
         if tabu
-            # println("Executing Tabu Search ...") 
-            tabu_search_2_vertices(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
-
+            if neighborhood_structure=="1_vertice"
+                tabu_search_1_vertice(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
+            end
+            if neighborhood_structure=="2_vertice"
+                tabu_search_2_vertices(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
+            end
         else
             # println("Executing Greedy Heuristic ...")
             greedy_random_assignment(G_0, nbr_colors)

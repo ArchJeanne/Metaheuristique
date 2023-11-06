@@ -24,6 +24,7 @@ Les paramètres d'exécution du programme sont définis dans le fichier `config.
 - `list_nb_colors` : Une liste du nombre de couleurs à utiliser pour chaque fichier d'instance.
 - `nbr_iters` : Le nombre d'itérations à exécuter pour chaque fichier d'instance.
 - `tabu` : Booléen pour spécifier l'utilisation de la recherche tabou.
+- `neighborhood_structure` : Chaîne de caractère qui spécifie si on choisit une structure de voisinage à 1-sommet d'échange de couleurs, ou une structure de voisinage correspondant à l'échange de couleurs de deux sommets voisins 
 - `permute` : Booléen pour spécifier la permutation des sommets du graphe.
 - `nbr_max_iter_tabu` : Le nombre maximum d'itérations pour la recherche tabou.
 - `iter_tabu_memory` : La mémoire de la liste tabou pour la recherche tabou.

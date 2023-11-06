@@ -109,9 +109,7 @@ function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_me
     while iter <= nbr_max_iter
         local_best_value = 10000000
         local_best_color = G.color[current_vertex]
-        if tabu_list[current_vertex, G.color[current_vertex]] < iter
-            tabu_list[current_vertex, G.color[current_vertex]] = iter
-        end
+        tabu_list[current_vertex, G.color[current_vertex]] += round(tabu_memory_iter * (iter//nbr_max_iter))
         for c=1:nbr_colors
             if iter > tabu_list[current_vertex, c]
                 neighboor_value = current_value + diff_evaluate_one_vertice(G, current_vertex, G.color[current_vertex], c)
@@ -125,7 +123,6 @@ function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_me
             current_value = local_best_value
         end
         G.color[current_vertex] = local_best_color
-        tabu_list[current_vertex, local_best_color] += round(tabu_memory_iter * (iter//nbr_max_iter))
         if local_best_value < best_value
             for v in 1:G.nbr_vertices
                 best_color[v] = G.color[v]
@@ -224,14 +221,14 @@ println(size(G.color))
 println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
 
 println(evaluate_single_instance(G))
-random_assignment(G, 5)
+random_assignment(G, 85)
 println(evaluate_single_instance(G))
-greedy_random_assignment(G, 5)
+greedy_random_assignment(G, 85)
 println(evaluate_single_instance(G))
 
 println("Executing Tabu Search ...") 
 time_start = time()
-tabu_search(G, 5, 100000, 3000)
+tabu_search(G, 85, 1000000, 100)
 println(evaluate_single_instance(G))
 time_end = time()
         execution_time = round(time_end - time_start,digits = 4)

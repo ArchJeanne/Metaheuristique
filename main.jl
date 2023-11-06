@@ -72,6 +72,7 @@ end
 function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
     """
     Assigns to each vertex a random color that is not its neighboors' if possible, and a random color otherwise
+    Returns corresponding graph
     """
     for i=1:G.nbr_vertices
         adj_colors = [G.color[v] for v=1:(i-1) if G.adj[v,i]==1] #colors of neighboors
@@ -82,6 +83,7 @@ function greedy_random_assignment(G::Graph_color, nbr_colors::Int)
             G.color[i] = rand(1:nbr_colors) #otherwise pick a random color
         end
     end
+    return G
 end
 
 function diff_evaluate_one_vertice(G::Graph_color, v::Int, old_color::Int, new_color::Int)
@@ -98,6 +100,17 @@ function diff_evaluate_one_vertice(G::Graph_color, v::Int, old_color::Int, new_c
     end
     return diff_conflicts
 end
+
+function neighbors(G::Graph_color, vertex::Int)
+    neighbor_indices = []
+    for v in 1:G.nbr_vertices
+        if G.adj[vertex, v] == 1
+            push!(neighbor_indices, v)
+        end
+    end
+    return neighbor_indices
+end
+
 
 function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
     best_color = copy(G.color)
@@ -138,6 +151,58 @@ function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_me
 end
 
 
+function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
+    G = greedy_random_assignment(G,nbr_colors)
+    best_color = copy(G.color)
+    best_value = evaluate_single_instance(G)
+    iter = 0
+    tabu_list = zeros(Int, G.nbr_vertices, G.nbr_vertices)
+    current_vertex = rand(1:G.nbr_vertices)
+    current_value = evaluate_single_instance(G)
+    while iter <= nbr_max_iter
+        local_best_value = 10000000
+        local_best_color = G.color[current_vertex]
+        local_best_adj_vertice = 0 #indix of vertice that improves the solution after swaping colors
+        local_best_color_adj_vertice = 0
+        for adj_vertice in neighbors(G,current_vertex)
+            if iter > tabu_list[current_vertex, adj_vertice]
+                colors_swaped = copy(G.color)
+                colors_swaped[current_vertex] = G.color[adj_vertice]
+                colors_swaped[adj_vertice] = G.color[current_vertex]
+                G_swaped = Graph_color(G.nbr_vertices, G.adj, colors_swaped)
+                neighboor_value = evaluate_single_instance(G_swaped) #G_swaped neighbor of G after 2-vertice swap
+                if neighboor_value < local_best_value
+                    local_best_color = G.color[adj_vertice]
+                    local_best_color_adj_vertice = G.color[current_vertex]
+                    local_best_value = neighboor_value
+                    local_best_adj_vertice = adj_vertice
+                end
+            end
+        end
+        if local_best_value < 10000000
+            current_value = local_best_value
+        end
+        G.color[current_vertex] = local_best_color
+        if local_best_adj_vertice!=0
+            G.color[local_best_adj_vertice] = local_best_color_adj_vertice
+            tabu_list[current_vertex, local_best_adj_vertice] += round(tabu_memory_iter * (iter//nbr_max_iter))
+        end
+
+        if local_best_value < best_value
+            for v in 1:G.nbr_vertices
+                best_color[v] = G.color[v]
+            end
+            best_value = local_best_value
+        end
+        iter += 1
+        current_vertex = rand(1:G.nbr_vertices)
+    end
+    for v in 1:G.nbr_vertices
+        G.color[v] = best_color[v]
+    end
+end
+
+
 function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::Bool, permute::Bool)
     """Evaluates for a given file the number of conflicts nbr_iters times
     Returns the min number of conflicts and corresponding execution time"""
@@ -148,7 +213,7 @@ function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::
         start_execution_time = time()
         if tabu
             # println("Executing Tabu Search ...") 
-            tabu_search(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
+            tabu_search_2_vertices(G_0, nbr_colors, nbr_max_iter_tabu, iter_tabu_memory) #Graph_color, nbr_colors, nbr_max_iter, tabu_memory_iter
 
         else
             # println("Executing Greedy Heuristic ...")
@@ -199,36 +264,36 @@ const nbr_iters = 10 #nbr of iterations for each file (we compute the nb of conf
 const tabu = true
 const permute = false
 # for tabu search
-const nbr_max_iter_tabu = 50000
-const iter_tabu_memory = 500
+const nbr_max_iter_tabu = 500000
+const iter_tabu_memory = 1000
 
 
 # Evaluation
-#evaluate_all_files()
+evaluate_all_files()
 
 
 
 
 # #Tests
-G = read_file("Fichiers/dsjc1000.5.col.txt", false)
-println(typeof(G))
-println(typeof(G.nbr_vertices))
-println(G.nbr_vertices)
-println(typeof(G.adj))
-println(size(G.adj))
-println(typeof(G.color))
-println(size(G.color))
-println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
+# G = read_file("Fichiers/dsjc1000.5.col.txt", false)
+# println(typeof(G))
+# println(typeof(G.nbr_vertices))
+# println(G.nbr_vertices)
+# println(typeof(G.adj))
+# println(size(G.adj))
+# println(typeof(G.color))
+# println(size(G.color))
+# println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
 
-println(evaluate_single_instance(G))
-random_assignment(G, 85)
-println(evaluate_single_instance(G))
-greedy_random_assignment(G, 85)
-println(evaluate_single_instance(G))
+# println(evaluate_single_instance(G))
+# random_assignment(G, 85)
+# println(evaluate_single_instance(G))
+# greedy_random_assignment(G, 85)
+# println(evaluate_single_instance(G))
 
-println("Executing Tabu Search ...") 
-time_start = time()
-tabu_search(G, 85, 1000000, 100)
-println(evaluate_single_instance(G))
-time_end = time()
-        execution_time = round(time_end - time_start,digits = 4)
+# println("Executing Tabu Search ...") 
+# time_start = time()
+# tabu_search(G, 85, 1000000, 100)
+# println(evaluate_single_instance(G))
+# time_end = time()
+#         execution_time = round(time_end - time_start,digits = 4)

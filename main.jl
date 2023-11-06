@@ -105,11 +105,13 @@ function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_me
     iter = 0
     tabu_list = zeros(Int, G.nbr_vertices, nbr_colors)
     current_vertex = rand(1:G.nbr_vertices)
+    current_value = evaluate_single_instance(G)
     while iter <= nbr_max_iter
-        local_best_value = 100000
+        local_best_value = 10000000
         local_best_color = G.color[current_vertex]
-        tabu_list[current_vertex, G.color[current_vertex]] = iter
-        current_value = evaluate_single_instance(G)
+        if tabu_list[current_vertex, G.color[current_vertex]] < iter
+            tabu_list[current_vertex, G.color[current_vertex]] = iter
+        end
         for c=1:nbr_colors
             if iter > tabu_list[current_vertex, c]
                 neighboor_value = current_value + diff_evaluate_one_vertice(G, current_vertex, G.color[current_vertex], c)
@@ -119,8 +121,11 @@ function tabu_search(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_me
                 end
             end
         end
+        if local_best_value < 10000000
+            current_value = local_best_value
+        end
         G.color[current_vertex] = local_best_color
-        tabu_list[current_vertex, local_best_color] += tabu_memory_iter
+        tabu_list[current_vertex, local_best_color] += round(tabu_memory_iter * (iter//nbr_max_iter))
         if local_best_value < best_value
             for v in 1:G.nbr_vertices
                 best_color[v] = G.color[v]
@@ -208,7 +213,7 @@ const iter_tabu_memory = 500
 
 
 # #Tests
-G = read_file("Fichiers/dsjc250.5.col.txt", false)
+G = read_file("Fichiers/dsjc1000.5.col.txt", false)
 println(typeof(G))
 println(typeof(G.nbr_vertices))
 println(G.nbr_vertices)
@@ -219,14 +224,14 @@ println(size(G.color))
 println("number of edges : ", sum(G.adj[i,j] for i=1:G.nbr_vertices, j=1:G.nbr_vertices)/2)
 
 println(evaluate_single_instance(G))
-random_assignment(G, 28)
+random_assignment(G, 5)
 println(evaluate_single_instance(G))
-#greedy_random_assignment(G, 5)
-#println(evaluate_single_instance(G))
+greedy_random_assignment(G, 5)
+println(evaluate_single_instance(G))
 
 println("Executing Tabu Search ...") 
 time_start = time()
-tabu_search(G, 28, 500000, 5000)
+tabu_search(G, 5, 100000, 3000)
 println(evaluate_single_instance(G))
 time_end = time()
         execution_time = round(time_end - time_start,digits = 4)

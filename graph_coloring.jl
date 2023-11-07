@@ -151,56 +151,105 @@ function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::In
 end
 
 
+function swap_colors_in_neighborhood(G::Graph_color, tabu_list,  iter::Int, tabu_memory_iter, nbr_max_iter, current_value)
+    # Two random vertices
+    v1 = rand(1:G.nbr_vertices)
+    neighbors_v1 = neighbors(G, v1)
+    v2 = rand(neighbors_v1)
+    color_v1 = G.color[v1]
+    color_v2 = G.color[v2]
+    
+    if iter > tabu_list[v1,v2] #couple v1 v2 allowed   
+        # Change node colors
+        G.color[v1] = color_v2
+        G.color[v2] = color_v1
+        # Value after exchange
+        new_value = evaluate_single_instance(G)
+        
+        if new_value < current_value
+            tabu_list[v1, v2] += round(tabu_memory_iter * (iter//nbr_max_iter))
+            current_value = new_value
+        else
+            # if the exchange doesn't reduce the obj function, get back to previous graph
+            G.color[v1] = color_v1
+            G.color[v2] = color_v2
+        end
+    end
+    return G, current_value, tabu_list
+end
+
+
 function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
+    # Initialisation
     G = greedy_random_assignment(G,nbr_colors)
-    best_color = copy(G.color)
-    best_value = evaluate_single_instance(G)
     iter = 0
     tabu_list = zeros(Int, G.nbr_vertices, G.nbr_vertices)
-    current_vertex = rand(1:G.nbr_vertices)
-    current_value = evaluate_single_instance(G)
+    best_value = evaluate_single_instance(G)
+    best_G = G
     while iter <= nbr_max_iter
-        local_best_value = 10000000
-        local_best_color = G.color[current_vertex]
-        local_best_adj_vertice = 0 #indix of vertice that improves the solution after swaping colors
-        local_best_color_adj_vertice = 0
-        for adj_vertice in neighbors(G,current_vertex)
-            if iter > tabu_list[current_vertex, adj_vertice]
-                colors_swaped = copy(G.color)
-                colors_swaped[current_vertex] = G.color[adj_vertice]
-                colors_swaped[adj_vertice] = G.color[current_vertex]
-                G_swaped = Graph_color(G.nbr_vertices, G.adj, colors_swaped)
-                neighboor_value = evaluate_single_instance(G_swaped) #G_swaped neighbor of G after 2-vertice swap
-                if neighboor_value < local_best_value
-                    local_best_color = G.color[adj_vertice]
-                    local_best_color_adj_vertice = G.color[current_vertex]
-                    local_best_value = neighboor_value
-                    local_best_adj_vertice = adj_vertice
-                end
-            end
+        current_value = evaluate_single_instance(G) #value before exchange
+        G, current_value, tabu_list = swap_colors_in_neighborhood(G, tabu_list, iter, tabu_memory_iter, nbr_max_iter, current_value)
+        
+        if current_value < best_value
+            best_G = G
+            best_value = current_value
         end
-        if local_best_value < 10000000
-            current_value = local_best_value
-        end
-        G.color[current_vertex] = local_best_color
-        if local_best_adj_vertice!=0
-            G.color[local_best_adj_vertice] = local_best_color_adj_vertice
-            tabu_list[current_vertex, local_best_adj_vertice] += round(tabu_memory_iter * (iter//nbr_max_iter))
-        end
-
-        if local_best_value < best_value
-            for v in 1:G.nbr_vertices
-                best_color[v] = G.color[v]
-            end
-            best_value = local_best_value
-        end
-        iter += 1
-        current_vertex = rand(1:G.nbr_vertices)
+        iter+=1
     end
-    for v in 1:G.nbr_vertices
-        G.color[v] = best_color[v]
-    end
+    return best_G, best_value
 end
+
+
+# function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
+#     G = greedy_random_assignment(G,nbr_colors)
+#     best_color = copy(G.color)
+#     best_value = evaluate_single_instance(G)
+#     iter = 0
+#     tabu_list = zeros(Int, G.nbr_vertices, G.nbr_vertices)
+#     current_vertex = rand(1:G.nbr_vertices)
+#     current_value = evaluate_single_instance(G)
+#     while iter <= nbr_max_iter
+#         local_best_value = 10000000
+#         local_best_color = G.color[current_vertex]
+#         local_best_adj_vertice = 0 #indix of vertice that improves the solution after swaping colors
+#         local_best_color_adj_vertice = 0
+#         for adj_vertice in neighbors(G,current_vertex)
+#             if iter > tabu_list[current_vertex, adj_vertice]
+#                 colors_swaped = copy(G.color)
+#                 colors_swaped[current_vertex] = G.color[adj_vertice]
+#                 colors_swaped[adj_vertice] = G.color[current_vertex]
+#                 G_swaped = Graph_color(G.nbr_vertices, G.adj, colors_swaped)
+#                 neighboor_value = evaluate_single_instance(G_swaped) #G_swaped neighbor of G after 2-vertice swap
+#                 if neighboor_value < local_best_value
+#                     local_best_color = G.color[adj_vertice]
+#                     local_best_color_adj_vertice = G.color[current_vertex]
+#                     local_best_value = neighboor_value
+#                     local_best_adj_vertice = adj_vertice
+#                 end
+#             end
+#         end
+#         if local_best_value < 10000000
+#             current_value = local_best_value
+#         end
+#         G.color[current_vertex] = local_best_color
+#         if local_best_adj_vertice!=0
+#             G.color[local_best_adj_vertice] = local_best_color_adj_vertice
+#             tabu_list[current_vertex, local_best_adj_vertice] += round(tabu_memory_iter * (iter//nbr_max_iter))
+#         end
+
+#         if local_best_value < best_value
+#             for v in 1:G.nbr_vertices
+#                 best_color[v] = G.color[v]
+#             end
+#             best_value = local_best_value
+#         end
+#         iter += 1
+#         current_vertex = rand(1:G.nbr_vertices)
+#     end
+#     for v in 1:G.nbr_vertices
+#         G.color[v] = best_color[v]
+#     end
+# end
 
 
 function evaluate_file(file_txt::String, nbr_iters::Int, nbr_colors::Int, tabu::Bool, permute::Bool)

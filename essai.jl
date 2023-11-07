@@ -44,7 +44,7 @@ function evaluate_single_instance(G::Graph_color)
     """Evaluates the number of conflicts in the coloring of a single instance"""
     conflicts = 0
     for i in 2:G.nbr_vertices
-            conflicts += sum(G.adj[k,i]*(G.color[i]==G.color[k]) for k=1:(i-1))
+        conflicts += sum(G.adj[k,i]*(G.color[i]==G.color[k]) for k=1:(i-1))
     end
     return conflicts
 end
@@ -126,6 +126,15 @@ function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::In
         for c=1:nbr_colors
             if iter > tabu_list[current_vertex, c]
                 neighboor_value = current_value + diff_evaluate_one_vertice(G, current_vertex, G.color[current_vertex], c)
+                # changed_colors = G.color
+                # changed_colors[current_vertex]=c
+                # G_changed = Graph_color(G.nbr_vertices,G.adj,changed_colors)
+                # if neighboor_value!=evaluate_single_instance(G_changed)
+                #     println("PROBLEM")
+                #     println(neighboor_value)
+                #     println(current_value)
+                #     println(evaluate_single_instance(G_changed))
+                # end
                 if neighboor_value < local_best_value
                     local_best_color = c
                     local_best_value = neighboor_value
@@ -141,6 +150,7 @@ function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::In
                 best_color[v] = G.color[v]
             end
             best_value = local_best_value
+            push!(values,best_value)
         end
         iter += 1
         current_vertex = rand(1:G.nbr_vertices)
@@ -148,6 +158,40 @@ function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::In
     for v in 1:G.nbr_vertices
         G.color[v] = best_color[v]
     end
+end
+
+function diff_evaluate_two_vertices(G::Graph_color, v1::Int, v2::Int, color1::Int, color2::Int)
+    diff_conflicts = 0
+    old_color_1 = color1 # old color of v1
+    new_color_1 = color2 # new color of v1
+    old_color_2 = color2 # old color of v2
+    new_color_2 = color1 # new color of v2
+    N1 = neighbors(G,v1) 
+    N2 = neighbors(G,v2) 
+    
+    # conflicts for v1
+    for i in neighbors(G,v1) 
+        if i!=v2    
+            if old_color_1 == G.color[i]
+                diff_conflicts = diff_conflicts - 1
+            end
+            if new_color_1 == G.color[i]
+                diff_conflicts = diff_conflicts + 1
+            end
+        end
+    end
+    # conflicts for v2
+    for i in neighbors(G,v2)  
+        if i!=v1      
+            if old_color_2 == G.color[i]
+                diff_conflicts = diff_conflicts - 1
+            end
+            if new_color_2 == G.color[i]
+                diff_conflicts = diff_conflicts + 1
+            end
+        end
+    end
+    return diff_conflicts
 end
 
 
@@ -168,8 +212,12 @@ function swap_colors_in_neighborhood(G::Graph_color, tabu_list,  iter::Int, tabu
             G.color[v1] = color_v2
             G.color[v2] = color_v1
             # Value after exchange
-            new_value = evaluate_single_instance(G)
-            
+            new_value = current_value + diff_evaluate_two_vertices(G,v1,v2,color_v1,color_v2)
+            # if new_value!=evaluate_single_instance(G)
+            #     println("PROBLLEM")
+            #     println(new_value)
+            #     println(evaluate_single_instance(G))
+            # end
             if new_value < current_value
                 current_value = new_value
                 best_color_v1 = color_v2
@@ -197,8 +245,9 @@ function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::I
     tabu_list = zeros(Int, G.nbr_vertices, G.nbr_vertices)
     best_value = evaluate_single_instance(G)
     best_G = G
+    current_value = evaluate_single_instance(G)
+
     while iter <= nbr_max_iter
-        current_value = evaluate_single_instance(G) #value before exchange
         G, current_value, tabu_list = swap_colors_in_neighborhood(G, tabu_list, iter, tabu_memory_iter, nbr_max_iter, current_value)
         
         if current_value < best_value
@@ -210,37 +259,6 @@ function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::I
     return best_G, best_value
 end
 
-function diff_evaluate_two_vertices(G::Graph_color, v1::Int, v2::Int, color1::Int, color2::Int)
-    diff_conflicts = 0
-    old_color_1 = color1 # old color of v1
-    new_color_1 = color2 # new color of v1
-    old_color_2 = color1 # old color of v2
-    new_color_2 = color2 # new color of v2
-    
-    # conflicts for v1
-    for i in neighbors(G,v1)  
-        if i!=v2      
-            if old_color_1 == G.color[i]
-                diff_conflicts = diff_conflicts - 1
-            end
-            if new_color_1 == G.color[i]
-                diff_conflicts = diff_conflicts + 1
-            end
-        end
-    end
-    # conflicts for v2
-    for i in neighbors(G,v2)  
-        if i!=v1      
-            if old_color_2 == G.color[i]
-                diff_conflicts = diff_conflicts - 1
-            end
-            if new_color_2 == G.color[i]
-                diff_conflicts = diff_conflicts + 1
-            end
-        end
-    end
-    return diff_conflicts
-end
 
 # function tabu_search_2_vertices(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
 #     G = greedy_random_assignment(G,nbr_colors)
@@ -388,7 +406,7 @@ println(evaluate_single_instance(G))
 
 println("Executing Tabu Search ...") 
 time_start = time()
-tabu_search_2_vertices(G, 5, 500000, 2500)
+tabu_search_2_vertices(G, 5, 500000, 50)
 println(evaluate_single_instance(G))
 time_end = time()
 execution_time = round(time_end - time_start,digits = 4)

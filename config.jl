@@ -6,8 +6,8 @@ module Config
     const list_nb_colors = [5, 44, 8, 28, 72, 86, 85, 84, 26, 15]
     const nbr_iters = 10
     const tabu = true
-    const neighborhood_structure = "2_vertice" #["1_vertice","2_vertice"]
+    const neighborhood_structure = "1_vertice" #["1_vertice","2_vertice"]
     const permute = false
-    const nbr_max_iter_tabu = 50000
-    const iter_tabu_memory = 100
+    const nbr_max_iter_tabu = 500000
+    const iter_tabu_memory = 1000
 end

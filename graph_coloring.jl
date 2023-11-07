@@ -115,10 +115,10 @@ end
 function tabu_search_1_vertice(G::Graph_color, nbr_colors::Int, nbr_max_iter::Int, tabu_memory_iter::Int)
     best_color = copy(G.color)
     best_value = evaluate_single_instance(G)
+    current_value = best_value
     iter = 0
     tabu_list = zeros(Int, G.nbr_vertices, nbr_colors)
     current_vertex = rand(1:G.nbr_vertices)
-    current_value = evaluate_single_instance(G)
     while iter <= nbr_max_iter
         local_best_value = 10000000
         local_best_color = G.color[current_vertex]

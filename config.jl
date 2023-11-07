@@ -8,6 +8,6 @@ module Config
     const tabu = true
     const neighborhood_structure = "2_vertice" #["1_vertice","2_vertice"]
     const permute = false
-    const nbr_max_iter_tabu = 5000000
-    const iter_tabu_memory = 50000
+    const nbr_max_iter_tabu = 50000
+    const iter_tabu_memory = 100
 end
